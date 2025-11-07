@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Çoklu Zeka Challenge • Gamify</title>
+<style>
+  :root{
+    --bg:#0f1226;--card:#181c3a;--soft:#232853;--text:#f3f5ff;--muted:#c9cdf6;--accent:#7c9cff;--accent2:#6fffe9;--gold:#ffd166;--danger:#ff6b6b;--ok:#06d6a0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial; background: radial-gradient(1200px 600px at 20% 0%, #19204a 0%, #0f1226 50%, #0b0e1d 100%); color:var(--text)}
+  header{position:sticky;top:0;z-index:10;background:rgba(15,18,38,.7);backdrop-filter:blur(8px);border-bottom:1px solid #2a2f6b}
+  .wrap{max-width:1100px;margin:0 auto;padding:14px 18px}
+  .row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .brand{font-weight:800;letter-spacing:.5px}
+  .brand span{color:var(--accent2)}
+  nav{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+  nav button{background:transparent;border:1px solid #2e3574;color:var(--text);padding:8px 12px;border-radius:14px;cursor:pointer}
+  nav button.active{background:linear-gradient(135deg,var(--accent),#8fe3ff);color:#0b0e1d;font-weight:700;border-color:transparent}
+  main{max-width:1100px;margin:24px auto;display:grid;grid-template-columns:1.2fr .8fr;gap:16px;padding:0 18px}
+  @media(max-width:900px){main{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,#1a1f44, #131736); border:1px solid #2b316c; border-radius:18px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  h1,h2,h3{margin:8px 0 10px}
+  h1{font-size:24px}
+  .muted{color:var(--muted);font-size:14px}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+  .controls input,.controls select{background:#0f132d;border:1px solid #2e3574;color:var(--text);padding:8px 12px;border-radius:12px}
+  .controls button{background:linear-gradient(180deg,#667bff,#7c9cff);border:none;color:#0b0e1d;font-weight:800;padding:10px 14px;border-radius:14px;cursor:pointer}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:#0e1330;border:1px solid #303987;padding:6px 10px;border-radius:999px;font-size:12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:700px){.grid{grid-template-columns:1fr}}
+  .flex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .scorebar{height:10px;background:#0f1335;border-radius:999px;overflow:hidden;border:1px solid #2b316c}
+  .scorefill{height:100%;background:linear-gradient(90deg,#7c9cff,#6fffe9)}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg,#2a316d,#1b214d);border:1px solid #3a4394;padding:8px 12px;border-radius:12px}
+  .badge .dot{width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+  .list{display:grid;gap:8px}
+  .list .item{display:flex;justify-content:space-between;align-items:center;background:#11163a;border:1px solid #2b316c;padding:8px 10px;border-radius:10px}
+  .center{display:flex;align-items:center;justify-content:center}
+  .big{font-size:28px;font-weight:900}
+  .gamearea{min-height:260px;display:grid;place-items:center;background:radial-gradient(circle at 60% 20%, #232a66, #151a3f 60%);border:1px dashed #3c459a;border-radius:16px;padding:14px;position:relative;overflow:hidden}
+  .tag{font-size:11px;color:var(--muted);border:1px solid #2e3574;padding:4px 8px;border-radius:999px}
+  .ok{color:var(--ok)}.danger{color:var(--danger)}
+  .hidden{display:none}
+  .kbd{background:#0d1130;border:1px solid #2b316c;border-bottom-width:3px;padding:4px 8px;border-radius:6px;font-weight:800}
+  .foot{font-size:12px;color:#9aa3ff}
+  .toast{position:fixed;bottom:18px;right:18px;background:#0f1335;border:1px solid #2b316c;padding:12px 14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:999;}
+@media(max-width:520px){.toast{left:50%;right:auto;transform:translateX(-50%);}}
+
+  /* Confetti */
+  .confetti{position:absolute;top:-10px;width:8px;height:14px;opacity:.9;transform:translateY(-20px);}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap row">
+    <div class="brand">🎮 <span>Çoklu Zeka</span> Challenge</div>
+    <nav>
+      <button data-tab="home" class="active">🏠 Ana Sayfa</button>
+      <button data-tab="game">🧠 Oyna</button>
+      <button data-tab="badges">🏅 Rozetler</button>
+      <button data-tab="leader">🏆 Liderlik</button>
+      <button data-tab="help">❓ Yardım</button>
+    </nav>
+  </div>
+</header>
+<main>
+  <!-- LEFT -->
+  <section id="left" class="card">
+    <div id="tab-home">
+      <h1>Hoş geldin! 🚀</h1>
+      <p class="muted">Oyunlaştırma unsurlarıyla güçlendirilmiş, çoklu zekâ alanlarına hitap eden mini görevlerle seviyeleri yükselt, rozetleri topla, liderlik tablosunda zirveye çık!</p>
+      <div class="controls">
+        <input id="playerName" placeholder="Kullanıcı adın (zorunlu)" />
+        <select id="mode">
+          <option value="mix">Karışık Mod (Önerilen)</option>
+          <option value="logic">Mantık-Matematik</option>
+          <option value="verbal">Sözel-Dil</option>
+          <option value="spatial">Görsel-Uzamsal (Dizilim/Hafıza)</option>
+          <option value="music">Müzikal-Ritmik (Ritim tekrarı)</option>
+          <option value="react">Hız-Dikkat (Reaksiyon)</option>
+        </select>
+        <button id="start">Başla ▶</button><button id="quick">Hemen Oyna ⚡</button>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3>Seviye</h3>
+          <div class="flex"><div id="level" class="big">1</div><span class="pill">XP <strong id="xp">0</strong></span><span class="pill">Seri <strong id="streak">0</strong></span></div>
+          <div class="scorebar" style="margin-top:8px"><div id="xpbar" class="scorefill" style="width:0%"></div></div>
+        </div>
+        <div class="card">
+          <h3>Puan</h3>
+          <div class="flex"><div id="score" class="big">0</div><span class="tag">Süre: <span id="time">—</span></span></div>
+          <div class="muted">Hız, doğruluk ve zorluk puanını etkiler.</div>
+        </div>
+      </div>
+      <div class="card gamearea" id="gamearea">
+        <div class="center">
+          <div>
+            <div class="pill">Hazır mısın?</div>
+            <h2>“Başla” ile ilk göreve geç!</h2>
+            <div class="muted">Her görev bir zekâ alanına odaklanır. Doğru yaptıkça zorlaşır.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-game" class="hidden">
+      <h2>Görev Alanı</h2>
+      <div class="card gamearea" id="playground"></div>
+      <div class="controls">
+        <button id="giveup">Görevi Geç ⏭</button>
+        <span class="pill">Seviye: <strong id="level2">1</strong></span>
+        <span class="pill">XP: <strong id="xp2">0</strong></span>
+        <span class="pill">Süre: <strong id="timer">—</strong></span>
+      </div>
+    </div>
+
+    <div id="tab-badges" class="hidden">
+      <h2>Rozetler</h2>
+      <div id="badgelist" class="list"></div>
+    </div>
+
+    <div id="tab-leader" class="hidden">
+      <h2>Liderlik Tablosu</h2>
+      <div id="lead" class="list"></div>
+    </div>
+
+    <div id="tab-help" class="hidden">
+      <h2>Nasıl Oynanır?</h2>
+      <ul>
+        <li>Bir <strong>mod</strong> seç ya da Karışık Mod’da ilerle.</li>
+        <li>Her görevde <strong>puan</strong> kazan, seri yap ve <strong>XP</strong> topla.</li>
+        <li>XP doldukça <strong>seviye atla</strong>, yeni rozetler aç.</li>
+        <li>En yüksek skorunu <strong>kaydet</strong> ve liderlikte yüksel.</li>
+      </ul>
+      <p class="foot">Zeka alanları: Mantık-Matematik, Sözel-Dil, Görsel-Uzamsal, Müzikal-Ritmik, Hız-Dikkat. Yakında <em>İçsel/Kişilerarası</em> mini senaryolar da eklenecek.</p>
+    </div>
+  </section>
+
+  <!-- RIGHT -->
+  <aside class="card">
+    <h3>Geri Bildirimler 💬</h3>
+    <div id="feed" class="list" style="max-height:420px;overflow:auto"></div>
+    <hr style="border-color:#2b316c;border-style:solid;margin:12px 0" />
+    <div class="flex">
+      <button id="saveScore">Skoru Kaydet 💾</button>
+      <button id="resetData" style="background:#1b214d;border:1px solid #3340a5;color:#dfe1ff">Verileri Sıfırla</button>
+    </div>
+    <p class="muted" style="margin-top:10px">Veriler tarayıcında saklanır (leaderboard & rozet ilerlemesi).</p>
+  </aside>
+</main>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+/*************************
+ * OYUN DURUMU & VERİLER *
+ *************************/
+const state = {
+  name: '', level: 1, xp: 0, score: 0, streak: 0, mode: 'mix',
+  badges: new Set(JSON.parse(localStorage.getItem('badges')||'[]')),
+  typesSeen: new Set(JSON.parse(localStorage.getItem('typesSeen')||'[]')),
+  bests: JSON.parse(localStorage.getItem('bests')||'[]'), // leaderboard
+  timer: null, tLeft: 0, roundActive: false
+};
+
+const BADGE_DEFS = [
+  {id:'first', name:'İlk Adım', desc:'İlk görevi tamamla', cond: s=>s.score>0},
+  {id:'streak3', name:'Seri Kazanan', desc:'3 seri başarı', cond: s=>s.streak>=3},
+  {id:'level10', name:'Zihin Ustası', desc:'Seviye 10', cond: s=>s.level>=10},
+  {id:'poly', name:'Çok Yönlü', desc:'4 farklı alan tamamla', cond: s=>s.typesSeen.size>=4},
+  {id:'flash', name:'Yıldırım', desc:'0.30 sn altında tepki', cond: s=>s._reactionUnder300},
+  {id:'rhythm', name:'Ritimci', desc:'Ritim görevinde tam isabet', cond: s=>s._rhythmPerfect},
+  {id:'memory', name:'Bellek', desc:'5+ uzunlukta dizi', cond: s=>s._memLen>=5},
+  {id:'word', name:'Sözcük Ustası', desc:'3 sözel doğru arka arkaya', cond: s=>s._verbalStreak>=3},
+];
+
+function saveProgress(){
+  localStorage.setItem('badges', JSON.stringify([...state.badges]));
+  localStorage.setItem('typesSeen', JSON.stringify([...state.typesSeen]));
+  localStorage.setItem('bests', JSON.stringify(state.bests));
+}
+
+/*******************
+ * YARDIMCI ARAÇLAR *
+ *******************/
+const $ = sel => document.querySelector(sel);
+function setText(id,val){ document.getElementById(id).textContent = val; }
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 1800); }
+function pushFeed(html){ const c=document.createElement('div'); c.className='item'; c.innerHTML=html; $('#feed').prepend(c); }
+function confettiBurst(el){ const colors=['#7c9cff','#6fffe9','#ffd166','#ff6b6b','#b794f6']; const area=el||$('#playground');
+  for(let i=0;i<36;i++){
+    const p=document.createElement('div');
+    p.className='confetti';
+    p.style.left=Math.random()*100+'%';
+    p.style.background=colors[i%colors.length];
+    p.style.transform=`rotate(${Math.random()*360}deg)`;
+    area.appendChild(p);
+    const dy= area.clientHeight + 40; const tx=Math.random()*60-30;
+    p.animate([{transform:`translate(${tx}px,-20px)`},{transform:`translate(${tx}px, ${dy}px)`}],{duration: 1200+Math.random()*900, easing:'cubic-bezier(.2,.7,.2,1)'}).onfinish=()=>p.remove();
+  }
+}
+
+function xpNeed(level){ return 100 + (level-1)*25; }
+function addXP(x){ state.xp += x; const need = xpNeed(state.level); if(state.xp>=need){ state.xp-=need; state.level++; setText('level',state.level); setText('level2',state.level); pushFeed(`<span>⬆️ <b>Seviye ${state.level}</b> oldun! (+Bonus 50 XP)</span>`); state.xp+=50; }
+  setText('xp', state.xp); setText('xp2', state.xp); const pct=Math.min(100, Math.round(state.xp/need*100)); $('#xpbar').style.width=pct+'%'; }
+
+function addScore(s){ state.score += s; setText('score', state.score); }
+
+function endRound(success, details=''){ state.roundActive=false; clearInterval(state.timer); state.timer=null; $('#timer').textContent='—';
+  if(success){ state.streak++; addXP(20 + 5*state.level); addScore(30 + 10*state.level); pushFeed(`✅ Başarılı! <span class="muted">${details}</span>`); unlockBadges(); confettiBurst($('#playground')); }
+  else{ state.streak=0; pushFeed(`❌ Kaçırdın. <span class="muted">${details}</span>`); }
+  setText('streak', state.streak);
+}
+
+function unlockBadges(){ let newOnes=[]; BADGE_DEFS.forEach(b=>{ if(!state.badges.has(b.id) && b.cond(state)){ state.badges.add(b.id); newOnes.push(b); }});
+  if(newOnes.length){ newOnes.forEach(b=>pushFeed(`🏅 <b>${b.name}</b> rozeti açıldı! <span class="muted">${b.desc}</span>`)); renderBadges(); confettiBurst($('#gamearea')); saveProgress(); }
+}
+
+function startTimer(seconds){ state.tLeft=seconds; $('#timer').textContent=state.tLeft+'s'; clearInterval(state.timer); state.timer=setInterval(()=>{ state.tLeft--; $('#timer').textContent=state.tLeft+'s'; if(state.tLeft<=0){ clearInterval(state.timer); state.timer=null; endRound(false,'Süre doldu'); } }, 1000); }
+
+/*****************
+ * GÖREV ÜRETİCİ *
+ *****************/
+const Tasks = {
+  // 1) Mantık-Matematik: küçük işlem / sayı deseni
+  logic({level}){
+    const a = rand(5, 12+level*2), b = rand(3, 9+level), ops=['+','-','×'];
+    const op = ops[rand(0, ops.length-1)];
+    const expr = `${a} ${op} ${b}`;
+    const ans = op==='+'?a+b:op==='-'?a-b:a*b;
+    const choices = shuffle([ans, ans+rand(1,3), ans-rand(1,3)]);
+    const html = `<div class="center" style="flex-direction:column;gap:10px">
+      <div class="tag">Mantık-Matematik</div>
+      <div class="big">${expr} = ?</div>
+      <div class="flex">${choices.map(c=>`<button class="opt kbd" data-v="${c}">${c}</button>`).join('')}</div>
+    </div>`;
+    const onmount = (root,done)=>{
+      root.querySelectorAll('.opt').forEach(btn=>btn.onclick=()=>{
+        if(+btn.dataset.v===ans){ done(true, 'Doğru hesap'); }
+        else done(false,'Yanlış cevap');
+      });
+    };
+    return {html,onmount,time: 15};
+  },
+  // 2) Sözel-Dil: tanıma uygun kelimeyi seç
+  verbal({level}){
+    const bank=[
+      {def:'Bir sorunu çözmek için izlenen yöntem', w:'strateji'},
+      {def:'Bir olayı kendi çıkarına göre yönlendirme', w:'manipülasyon'},
+      {def:'Bir konu üzerinde derin düşünme', w:'tefekkür'},
+      {def:'Kısa ve öz anlatım', w:'veciz'},
+      {def:'Bir işi yapma gücü, yetenek', w:'kabiliyet'},
+    ];
+    const pick=bank[rand(0,bank.length-1)];
+    state._verbalStreak = state._verbalStreak||0;
+    const wrongs=shuffle(bank.filter(x=>x.w!==pick.w)).slice(0,2).map(x=>x.w);
+    const choices=shuffle([pick.w, ...wrongs]);
+    const html=`<div class="center" style="flex-direction:column;gap:10px">
+      <div class="tag">Sözel-Dil</div>
+      <div>${pick.def}</div>
+      <div class="flex">${choices.map(c=>`<button class="opt kbd" data-v="${c}">${c}</button>`).join('')}</div>
+    </div>`;
+    const onmount=(root,done)=>{
+      root.querySelectorAll('.opt').forEach(btn=>btn.onclick=()=>{
+        if(btn.dataset.v===pick.w){ state._verbalStreak++; done(true,'Harika sözcük seçimi'); }
+        else { state._verbalStreak=0; done(false,'Bir dahaki sefere'); }
+      });
+    };
+    return {html,onmount,time: 18};
+  },
+  // 3) Görsel-Uzamsal: 3x3 dizilim hafızası
+  spatial({level}){
+    const size=3; const len=Math.min(2+Math.floor(level/2), 6); state._memLen=len; const cells=[...Array(size*size)].map((_,i)=>i);
+    const seq=[]; for(let i=0;i<len;i++) seq.push(cells[rand(0,cells.length-1)]);
+    const html=`<div style="display:grid;gap:8px;grid-template-columns:repeat(3,70px)">
+      ${cells.map((_,i)=>`<button class="cell" data-i="${i}" style="width:70px;height:70px;border-radius:10px;border:1px solid #3b4498;background:#0e1330"></button>`).join('')}
+    </div>
+    <div class="muted">Sıralamayı tekrarla.</div>`;
+    const onmount=(root,done)=>{
+      const buttons=[...root.querySelectorAll('.cell')];
+      // gösterim
+      let idx=0; const flash=()=>{ const i=seq[idx]; const b=buttons[i]; b.style.background='#7c9cff'; setTimeout(()=>{b.style.background='#0e1330'; idx++; if(idx<seq.length) setTimeout(flash, 350);}, 350); };
+      setTimeout(flash, 400);
+      const input=[]; buttons.forEach(b=>b.onclick=()=>{
+        input.push(+b.dataset.i);
+        b.animate([{transform:'scale(1)'},{transform:'scale(.92)'}],{duration:90});
+        if(input.length===seq.length){ const ok=input.every((v,k)=>v===seq[k]); ok?done(true,'Mükemmel hafıza!'):done(false,'Sıralama yanlış'); }
+      });
+    };
+    return {html,onmount,time: 25};
+  },
+  // 4) Müzikal-Ritmik: basit ritim tekrarı (3 tuş)
+  music({level}){
+    const tones=[220,330,440]; const seqLen=Math.min(3+Math.floor(level/2),6); const seq=[]; for(let i=0;i<seqLen;i++) seq.push(rand(0,2));
+    const html=`<div class="center" style="flex-direction:column;gap:12px">
+      <div class="tag">Müzikal-Ritmik</div>
+      <div class="flex">${['◼','◆','●'].map((s,i)=>`<button class="tone kbd" data-i="${i}">${s}</button>`).join('')}</div>
+      <div class="muted">Önce dinle, sonra aynı sırayla tıkla.</div>
+      <button class="kbd" id="play">▶ Dinlet</button>
+    </div>`;
+    const onmount=(root,done)=>{
+      const ctx = new (window.AudioContext||window.webkitAudioContext)(); document.body.addEventListener('click',()=>{if(ctx.state==='suspended'){ctx.resume();}}, {once:true});
+      function beep(freq, dur=0.18){ const o=ctx.createOscillator(); const g=ctx.createGain(); o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(ctx.destination); g.gain.value=.15; o.start(); setTimeout(()=>{o.stop();}, dur*1000); }
+      function playSeq(){ let t=0; seq.forEach(i=>{ setTimeout(()=>beep(tones[i]), t); t+=280; }); }
+      $('#play').onclick=()=>playSeq();
+      setTimeout(playSeq, 400);
+      const input=[]; root.querySelectorAll('.tone').forEach(btn=>btn.onclick=()=>{
+        const i=+btn.dataset.i; beep(tones[i], .12); input.push(i);
+        if(input.length===seq.length){ const ok=input.every((v,k)=>v===seq[k]); state._rhythmPerfect=ok; ok?done(true,'Ritim tutuyor!'):done(false,'Ritim kaçtı'); }
+      });
+    };
+    return {html,onmount,time: 22};
+  },
+  // 5) Hız-Dikkat: renk değişince tıkla
+  react({level}){
+    const wait=rand(600, 1600 - Math.min(level*50,700));
+    const html=`<div class="center" style="flex-direction:column;gap:10px">
+      <div class="tag">Hız-Dikkat</div>
+      <div id="target" style="width:220px;height:120px;border-radius:14px;background:#2a316d;border:2px dashed #3e48a8" class="center">Bekle...</div>
+      <div class="muted">Renk <b>yeşile</b> dönünce tıkla.</div>
+    </div>`;
+    const onmount=(root,done)=>{
+      const box=root.querySelector('#target');
+      setTimeout(()=>{ box.textContent='Şimdi!'; box.style.background='#0f5'; const start=performance.now();
+        function click(){ const rt=performance.now()-start; state._reactionUnder300 = rt<300; done(true, `Tepki: ${(rt|0)} ms`); box.removeEventListener('click',click); }
+        box.addEventListener('click',click);
+      }, wait);
+    };
+    return {html,onmount,time: 6};
+  },
+};
+
+const TYPES = Object.keys(Tasks);
+function pickType(){ if(state.mode==='mix'){ return TYPES[rand(0,TYPES.length-1)]; } return state.mode; }
+
+function loadTask(){ const type=pickType(); state.typesSeen.add(type); const task=Tasks[type]({level:state.level});
+  const root=$('#playground'); root.innerHTML=task.html; state.roundActive=true; startTimer(task.time);
+  task.onmount(root,(ok,info)=>{ if(!state.roundActive) return; endRound(ok, info); });
+}
+
+/************
+ * ARAYÜZ *
+ ************/
+function showTab(key){ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===key));
+  ['home','game','badges','leader','help'].forEach(id=>$('#tab-'+id).classList.add('hidden'));
+  $('#tab-'+key).classList.remove('hidden'); }
+
+function renderBadges(){ const c=$('#badgelist'); c.innerHTML='';
+  BADGE_DEFS.forEach(b=>{
+    const owned=state.badges.has(b.id);
+    const el=document.createElement('div'); el.className='item';
+    el.innerHTML=`<div class="badge">${owned?'<span class="dot"></span>':'<span class="dot" style="background:#555"></span>'}<div><b>${b.name}</b><div class="muted" style="font-size:12px">${b.desc}</div></div></div><span class="tag">${owned?'Açıldı':'Kilitle'}</span>`;
+    c.appendChild(el);
+  });
+}
+
+function renderLeader(){ const c=$('#lead'); c.innerHTML='';
+  const arr=[...state.bests].sort((a,b)=>b.score-a.score).slice(0,10);
+  if(!arr.length){ c.innerHTML='<div class="muted">Henüz kayıt yok.</div>'; return; }
+  arr.forEach((r,i)=>{
+    const el=document.createElement('div'); el.className='item';
+    el.innerHTML=`<span>${i+1}. <b>${escapeHtml(r.name)}</b></span><span>${r.score} puan <span class="tag">${new Date(r.t).toLocaleDateString('tr-TR')}</span></span>`;
+    c.appendChild(el);
+  });
+}
+
+/****************
+ * OLAY BAĞLAMA *
+ ****************/
+$('#start').onclick=()=>{ let n=$('#playerName').value.trim(); if(!n){ n='Oyuncu'; toast('İsim boş: "Oyuncu" ile başlıyorum.'); } state.name=n; state.mode=$('#mode').value; showTab('game'); nextRound(); };
+$('#giveup').onclick=()=>{ if(!state.roundActive){ toast('Aktif görev yok.'); return;} endRound(false,'Görev atlandı'); };
+$('#saveScore').onclick=()=>{ if(!state.name){ toast('Önce kullanıcı adını gir ve oyna.'); return; } state.bests.push({name:state.name, score:state.score, t:Date.now()}); saveProgress(); renderLeader(); toast('Skor kaydedildi'); };
+$('#resetData').onclick=()=>{ if(confirm('Tüm veriler (rozetler, skorlar) silinsin mi?')){ localStorage.clear(); state.badges.clear(); state.typesSeen.clear(); state.bests=[]; renderBadges(); renderLeader(); toast('Veriler sıfırlandı'); } };
+
+document.querySelectorAll('nav button').forEach(btn=>btn.onclick=()=>{ showTab(btn.dataset.tab); if(btn.dataset.tab==='badges') renderBadges(); if(btn.dataset.tab==='leader') renderLeader(); });
+
+function nextRound(){ setText('level',state.level); setText('level2',state.level); setText('xp',state.xp); setText('xp2',state.xp); setText('streak',state.streak); setText('score',state.score); loadTask(); }
+
+/***********
+ * ARAÇLAR *
+ ***********/
+function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function shuffle(arr){ return arr.sort(()=>Math.random()-.5); }
+function escapeHtml(s){ return s.replace(/[&<>"]+/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",""":"&quot;"}[m])); }
+
+// ilk yüklemeler
+renderBadges(); renderLeader();
+
+// Eğlenceli ilk mesajlar
+pushFeed('🎯 Hedef: 4 farklı alanı tamamlayıp <b>Çok Yönlü</b> rozetini aç!');
+pushFeed('💡 İpucu: Hızlı doğru cevaplar seri bonusu verir.');
+
+</script>
+</body>
+</html>
