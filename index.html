@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8">
-  <title>MindGA – Çoklu Zekâ Oyunu</title>
+  <title>MindGA – Çoklu Zekâ Oyunu (Gelişmiş)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root{
@@ -13,7 +13,6 @@
       --text:#f9fafb;
       --muted:#a3a7d4;
       --primary:#60a5fa;
-      --primary-dark:#1d4ed8;
       --accent:#facc15;
       --correct:#22c55e;
       --wrong:#f97373;
@@ -97,7 +96,7 @@
     .optBtn{
       background:#111832;
       border:2px solid #2f3b80;
-      color:#ffffff;          /* ÖNEMLİ: YAZI BEYAZ */
+      color:#ffffff;          /* BEYAZ YAZI – KARANLIKTA NET GÖRÜNÜR */
       border-radius:12px;
       padding:10px 16px;
       min-width:90px;
@@ -149,9 +148,9 @@
 <div class="wrap">
   <!-- ÜST: Kullanıcı adı ve durum -->
   <div class="card">
-    <h1>Mind Game – <span style="color:#4ade80">Touch Fix</span></h1>
+    <h1>MindGA – Çoklu Zekâ Oyunu</h1>
     <p class="muted">
-      Kullanıcı adını yaz, soruları çöz, seviye atla. Puanını kaydedip liderlik tablosunda yerini al. 🎮🧠
+      Kullanıcı adını yaz, zorlayıcı soruları çöz, seviye atla. Puanını kaydedip liderlik tablosunda yerini al. 🎮🧠
     </p>
     <div id="login" class="row">
       <input id="userName" placeholder="Kullanıcı adın" />
@@ -191,7 +190,7 @@
     <h2>Rozetler</h2>
     <ul id="badgeList"></ul>
     <p class="muted">
-      Örnek rozetler: <b>İlk Adım</b> (ilk doğru), <b>Seri Ustası</b> (3 doğru arka arkaya),
+      Rozet örnekleri: <b>İlk Adım</b> (ilk doğru), <b>Seri Ustası</b> (3 doğru arka arkaya),
       <b>Zihin Ustası</b> (100+ puan), <b>Çoklu Zekâ</b> (en az 3 farklı görev türü).
     </p>
   </div>
@@ -211,6 +210,9 @@
     badges:[],
     leaderboard:[]
   };
+
+  // Aynı soru bir oturumda tekrar gelmesin
+  const askedSet = new Set();
 
   // LocalStorage'dan yükle
   (function loadStored(){
@@ -242,77 +244,224 @@
     $("#totalLabel").textContent  = state.totalCount;
   }
 
-  // Görevler (mantık, sözel, hafıza, dikkat)
+  // MANTIK–MATEMATİK (zor, çeşitli)
   function makeLogicTask(){
-    const a=rand(2,15), b=rand(2,10);
-    const ops=["+","-","×"];
-    const op = pick(ops);
-    let ans;
-    if(op==="+") ans=a+b;
-    else if(op==="-") ans=a-b;
-    else ans=a*b;
-    const w1 = ans+rand(1,3);
-    const w2 = ans-rand(1,3);
-    const opts = shuffle([ans,w1,w2]);
+    const tip = rand(1,4);
+
+    // Tip 1: Denklem çözme: ax + b = c
+    if(tip === 1){
+      const a = rand(2,9);
+      const x = rand(1,20);
+      const b = rand(-15,15);
+      const c = a*x + b;
+      const dogru = x;
+      const yan1 = dogru + rand(1,4);
+      const yan2 = dogru - rand(1,4);
+      const secenekler = shuffle([dogru, yan1, yan2]);
+      return {
+        typeLabel:"Mantık-Matematik",
+        question:`${a}x ${b>=0?"+":"-"} ${Math.abs(b)} = ${c} denkleminde x kaçtır?`,
+        options:secenekler,
+        correct:dogru
+      };
+    }
+
+    // Tip 2: Örüntü
+    if(tip === 2){
+      const a0   = rand(3,40);
+      const diff = rand(3,9);
+      const n1 = a0;
+      const n2 = a0+diff;
+      const n3 = a0+2*diff;
+      const n4 = a0+3*diff;
+      const dogru = n4;
+      const yan1  = dogru + diff;
+      const yan2  = dogru - diff;
+      const secenekler = shuffle([dogru, yan1, yan2]);
+      return {
+        typeLabel:"Mantık-Matematik",
+        question:`Örüntüyü tamamlayın: ${n1}, ${n2}, ${n3}, ?`,
+        options:secenekler,
+        correct:dogru
+      };
+    }
+
+    // Tip 3: Çok adımlı işlem
+    if(tip === 3){
+      const a = rand(5,40);
+      const b = rand(3,25);
+      const c = rand(2,9);
+      const d = rand(1,15);
+      const dogru = (a + b)*c - d;
+      const yan1  = dogru + rand(3,10);
+      const yan2  = dogru - rand(3,10);
+      const secenekler = shuffle([dogru, yan1, yan2]);
+      return {
+        typeLabel:"Mantık-Matematik",
+        question:`( ${a} + ${b} ) × ${c} - ${d} işleminin sonucu kaçtır?`,
+        options:secenekler,
+        correct:dogru
+      };
+    }
+
+    // Tip 4: Yüzde problemi
+    const temel = rand(80,400);
+    const p     = rand(5,35);
+    const dogru = Math.round(temel * (100+p) / 100);
+    const yan1  = Math.round(temel * (100+p-5)/100);
+    const yan2  = Math.round(temel * (100+p+5)/100);
+    const secenekler = shuffle([dogru, yan1, yan2]);
     return {
       typeLabel:"Mantık-Matematik",
-      question:`${a} ${op} ${b} = ?`,
-      options:opts,
-      correct:ans
+      question:`${temel} sayısının %${p} artmış hâli kaçtır?`,
+      options:secenekler,
+      correct:dogru
     };
   }
 
+  // SÖZEL – DİL (zor, çeşitli)
   function makeVerbalTask(){
-    const bank=[
-      {def:"Kısa ve öz anlatım",word:"veciz"},
-      {def:"Bir sorunu çözmek için izlenen yöntem",word:"strateji"},
-      {def:"Derin düşünme",word:"tefekkür"},
-      {def:"Bir işi yapma gücü / yetenek",word:"kabiliyet"}
+    const tip = rand(1,3);
+
+    const esBank = [
+      {kelime:"müteşekkir", es:"minnettar"},
+      {kelime:"muhafaza",   es:"koruma"},
+      {kelime:"itibar",     es:"saygınlık"},
+      {kelime:"muhatap",    es:"karşı taraf"},
+      {kelime:"tevazu",     es:"alçakgönüllülük"},
+      {kelime:"tasvip",     es:"onaylama"}
     ];
-    const p = pick(bank);
-    const wrongs = shuffle(bank.filter(x=>x.word!==p.word)).slice(0,2).map(x=>x.word);
-    const opts = shuffle([p.word,...wrongs]);
+    const zitBank = [
+      {kelime:"iyimser",  zit:"kötümser"},
+      {kelime:"durgun",   zit:"hareketli"},
+      {kelime:"sığ",      zit:"derin"},
+      {kelime:"cömert",   zit:"cimri"},
+      {kelime:"cesur",    zit:"korkak"}
+    ];
+    const grupBank = [
+      {sec:["matematik","geometri","cebir","biyoloji"], fark:"biyoloji"},
+      {sec:["bencil","çıkarcı","kendini düşünen","özverili"], fark:"özverili"},
+      {sec:["korkak","ürkek","çekingen","cesur"], fark:"cesur"},
+      {sec:["bilim insanı","öğretmen","mühendis","bulaşık"], fark:"bulaşık"}
+    ];
+
+    // Tip 1: eş anlam
+    if(tip === 1){
+      const kayit = pick(esBank);
+      const dogru = kayit.es;
+      const yan1  = pick(esBank.filter(x=>x!==kayit)).es;
+      const yan2  = "hiçbiri";
+      const secenekler = shuffle([dogru, yan1, yan2]);
+      return {
+        typeLabel:"Sözel-Dil",
+        question:`“${kayit.kelime}” sözcüğüne anlamca en yakın olan hangisidir?`,
+        options:secenekler,
+        correct:dogru
+      };
+    }
+
+    // Tip 2: zıt anlam
+    if(tip === 2){
+      const kayit = pick(zitBank);
+      const dogru = kayit.zit;
+      const yan1  = pick(zitBank.filter(x=>x!==kayit)).zit;
+      const yan2  = kayit.kelime;
+      const secenekler = shuffle([dogru, yan1, yan2]);
+      return {
+        typeLabel:"Sözel-Dil",
+        question:`“${kayit.kelime}” sözcüğünün anlamca zıttı hangisidir?`,
+        options:secenekler,
+        correct:dogru
+      };
+    }
+
+    // Tip 3: gruba uymayan
+    const kayit = pick(grupBank);
+    const secenekler = shuffle(kayit.sec);
     return {
       typeLabel:"Sözel-Dil",
-      question:p.def,
-      options:opts,
-      correct:p.word
+      question:"Aşağıdakilerden hangisi anlamca diğerleriyle aynı grupta DEĞİLDİR?",
+      options:secenekler,
+      correct:kayit.fark
     };
   }
 
+  // GÖRSEL – HAFIZA (uzun dizi)
   function makeMemoryTask(){
-    const emoji = pick(["⭐","🔺","🔵","🟢"]);
-    const count = rand(2,5);
-    const seq   = emoji.repeat(count);
-    const opts  = shuffle([count, count+1, Math.max(1,count-1)]);
+    const emojis = ["⭐","🔺","🔵","🟢","🟣","🟥"];
+    const len = rand(6,10);
+    const dizilim = [];
+    for(let i=0;i<len;i++) dizilim.push(pick(emojis));
+    const hedef = pick(emojis);
+    const say = dizilim.filter(e=>e===hedef).length || 1;
+    const yan1 = Math.max(1,say-1);
+    const yan2 = say+1;
+    const secenekler = shuffle([say, yan1, yan2]);
     return {
       typeLabel:"Görsel-Hafıza",
-      question:`Dizide (${seq}) kaç adet ${emoji} vardı?`,
-      options:opts,
-      correct:count
+      question:`Dizide (${dizilim.join(" ")}) kaç adet "${hedef}" vardı?`,
+      options:secenekler,
+      correct:say
     };
   }
 
+  // DİKKAT – HIZ (örüntü ve farklı olan)
   function makeAttentionTask(){
-    const base = pick(["A","B","C","D"]);
-    const odd  = pick(["X","Y","Z"]);
-    const arr  = shuffle([base,base,base,odd]);
+    const tip = rand(1,2);
+
+    // Tip 1: harf–sayı kodu
+    if(tip === 1){
+      const kayit = pick([
+        {a:"C3",b:"E5",c:"H8",dogru:"K11"},
+        {a:"B2",b:"D4",c:"F6",dogru:"H8"},
+        {a:"A1",b:"C3",c:"E5",dogru:"G7"}
+      ]);
+      const yan1 = "K10";
+      const yan2 = "L12";
+      const secenekler = shuffle([kayit.dogru, yan1, yan2]);
+      return {
+        typeLabel:"Dikkat-Hız",
+        question:`Kural: Harfin alfabedeki sıra numarası = yanındaki sayı.\nÖrnekler: ${kayit.a}, ${kayit.b}, ${kayit.c}. Buna göre hangisi kuralı DOĞRU uygular?`,
+        options:secenekler,
+        correct:kayit.dogru
+      };
+    }
+
+    // Tip 2: yapı bakımından farklı olan
+    const gruplar = [
+      {sec:["AB12","AC13","AD14","AX99"], fark:"AX99"},
+      {sec:["KLM7","KLM8","KLM9","KM7"],  fark:"KM7"},
+      {sec:["P3Q","R5S","T7U","V8"],      fark:"V8"}
+    ];
+    const g = pick(gruplar);
+    const secenekler = shuffle(g.sec);
     return {
       typeLabel:"Dikkat-Hız",
-      question:"Aşağıdakilerden hangisi diğerlerinden farklı?",
-      options:arr,
-      correct:odd
+      question:"Aşağıdaki dizilerden hangisi yapı bakımından diğerlerinden farklıdır?",
+      options:secenekler,
+      correct:g.fark
     };
+  }
+
+  // Aynı soruyu tekrar etmemek için benzersiz görev seçici
+  function getUniqueTask(){
+    let task, key, tries = 0;
+    do{
+      const makers=[makeLogicTask,makeVerbalTask,makeMemoryTask,makeAttentionTask];
+      const maker = pick(makers);
+      task = maker();
+      key = task.typeLabel + "|" + task.question + "|" + task.correct;
+      tries++;
+    }while(askedSet.has(key) && tries < 50);
+    askedSet.add(key);
+    return task;
   }
 
   function createTask(){
-    const makers=[makeLogicTask,makeVerbalTask,makeMemoryTask,makeAttentionTask];
-    const maker = pick(makers);
-    const task  = maker();
+    const task = getUniqueTask();
 
     state.typesUsed[task.typeLabel] = true;
     state.totalCount++;
-
     $("#taskType").textContent = task.typeLabel;
     $("#question").textContent = task.question;
     $("#feedback").textContent = "";
@@ -369,7 +518,7 @@
     updateHud();
   }
 
-  // Rozet kontrol
+  // Rozet sistemi
   function addBadge(id){
     if(!state.badges.includes(id)){
       state.badges.push(id);
@@ -447,6 +596,7 @@
     state.correctCount=0;
     state.totalCount=0;
     state.typesUsed={};
+    askedSet.clear();
     $("#currentPlayer").style.display="block";
     $("#game").style.display="block";
     createTask();
@@ -455,7 +605,7 @@
   $("#nextBtn").onclick = ()=>createTask();
   $("#saveBtn").onclick = ()=>saveScore();
 
-  // İlk yükleme: liderlik + rozet
+  // İlk yüklemede liderlik ve rozetleri çiz
   renderBoard();
   renderBadges();
   updateHud();
