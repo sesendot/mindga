@@ -1,195 +1,454 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mind Game – Touch Fix</title>
-<style>
-  :root{--bg:#0f1226;--card:#171b39;--line:#2b316c;--text:#f3f5ff;--muted:#c9cdf6;--accent:#7c9cff;--accent2:#6fffe9;}
-  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
-  html,body{height:100%}
-  body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#0f1226;color:var(--text);}
-  .wrap{max-width:900px;margin:0 auto;padding:16px}
-  .card{background:linear-gradient(180deg,#1a1f44,#14183a);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:14px}
-  .btn{background:linear-gradient(180deg,#7c9cff,#8fe3ff);color:#0b0e1d;font-weight:800;border:none;border-radius:14px;padding:12px 16px;cursor:pointer;touch-action:manipulation}
-  .btn:active{transform:scale(.98)}
-  .kbd{background:#0e1233;border:1px solid #2b316c;border-bottom-width:3px;border-radius:12px;padding:10px 14px;cursor:pointer;touch-action:manipulation}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media(max-width:640px){.grid{grid-template-columns:1fr}}
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .muted{color:var(--muted)}
-  .big{font-size:22px;font-weight:900}
-  button, .kbd{pointer-events:auto}
-</style>
+  <meta charset="utf-8">
+  <title>MindGA – Zeka Oyunu (Açık Tema)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root{
+      --bg:#f3f5fb;
+      --card:#ffffff;
+      --border:#d0d4e6;
+      --text:#111827;
+      --muted:#6b7280;
+      --primary:#2563eb;
+      --primary-dark:#1d4ed8;
+      --accent:#f97316;
+      --correct:#16a34a;
+      --wrong:#dc2626;
+    }
+    *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+    body{
+      margin:0;
+      font-family:system-ui,Segoe UI,Roboto,Arial;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      max-width:900px;
+      margin:0 auto;
+      padding:16px;
+    }
+    h1{margin:0 0 6px;font-size:24px}
+    h2{margin:0 0 4px;font-size:18px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      margin-top:14px;
+      box-shadow:0 4px 10px rgba(15,23,42,.06);
+    }
+    .row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    input,button{
+      font:inherit;
+    }
+    input{
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#f9fafb;
+      color:var(--text);
+      min-width:160px;
+    }
+    button{
+      padding:8px 14px;
+      border-radius:999px;
+      border:none;
+      cursor:pointer;
+      background:var(--primary);
+      color:white;
+      font-weight:600;
+      touch-action:manipulation;
+    }
+    button:active{transform:scale(.97);}
+    .muted{color:var(--muted);font-size:13px}
+    #currentPlayer{margin-top:6px}
+    #game{margin-top:8px}
+    #taskType{
+      font-size:13px;
+      color:var(--accent);
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+    }
+    #question{
+      margin:8px 0 10px;
+      font-size:18px;
+    }
+    #options{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .optBtn{
+      background:#eef2ff;
+      border:1px solid #c7d2fe;
+      color:var(--text);
+      border-radius:12px;
+      padding:8px 14px;
+      min-width:80px;
+      text-align:center;
+      cursor:pointer;
+      touch-action:manipulation;
+    }
+    .optBtn.correct{
+      background:#dcfce7;
+      border-color:#86efac;
+      color:#065f46;
+      font-weight:700;
+    }
+    .optBtn.wrong{
+      background:#fee2e2;
+      border-color:#fecaca;
+      color:#991b1b;
+    }
+    #feedback{
+      min-height:22px;
+      font-size:14px;
+      margin-top:4px;
+    }
+    #hudSmall{
+      font-size:14px;
+      margin-top:4px;
+    }
+    #hudSmall span{font-weight:600}
+    #leaderboard ol{
+      padding-left:20px;
+      margin:4px 0 0;
+    }
+    #leaderboard li{margin-bottom:3px;font-size:14px}
+    #badgeList{
+      padding-left:20px;
+      margin:4px 0 0;
+      font-size:14px;
+    }
+    #badgeList li{margin-bottom:3px}
+    @media(max-width:640px){
+      h1{font-size:20px}
+      .wrap{padding:12px}
+    }
+  </style>
 </head>
 <body>
 <div class="wrap">
+  <!-- ÜST: Kullanıcı adı ve durum -->
   <div class="card">
-    <div class="big">Mind Game – <span style="color:var(--accent2)">Touch Fix</span></div>
-    <div class="muted">Dokunma uyumlu sürüm. “Hemen Oyna” ile başla.</div>
-    <div class="row" style="margin-top:8px">
-      <button id="quick" class="btn">⚡ Hemen Oyna</button>
-      <button id="restart" class="kbd">🔄 Yeniden Başlat</button>
+    <h1>MindGA – Zeka Oyunu</h1>
+    <p class="muted">
+      Kullanıcı adını yaz, soruları çöz, puan ve seviye kazan. Skorunu liderlik tablosuna kaydedebilirsin. 🎮🧠
+    </p>
+    <div id="login" class="row">
+      <input id="userName" placeholder="Kullanıcı adın" />
+      <button id="startBtn">Oyuna Başla</button>
+    </div>
+    <div id="currentPlayer" class="muted" style="display:none">
+      Oyuncu: <b id="playerLabel"></b> • Seviye: <b id="levelLabel">1</b> • Puan: <b id="scoreLabel">0</b> • Seri: <b id="streakLabel">0</b>
     </div>
   </div>
 
-  <div id="hud" class="card">
-    <div>Puan: <b id="score">0</b> • Seviye: <b id="level">1</b> • Süre: <b id="time">—</b></div>
-    <div class="muted">Doğru → +30 puan, +20 XP • Yanlış/Süre → seri bozulur</div>
+  <!-- OYUN ALANI -->
+  <div id="game" class="card" style="display:none">
+    <div id="taskType"></div>
+    <div id="question"></div>
+    <div id="options"></div>
+    <div id="feedback" class="muted"></div>
+    <div id="hudSmall" class="muted">
+      Doğru: <span id="correctLabel">0</span> • Çözülmüş soru: <span id="totalLabel">0</span>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button id="nextBtn">Sonraki Soru</button>
+      <button id="saveBtn" style="background:var(--accent);color:white">Skoru Liderliğe Kaydet</button>
+    </div>
   </div>
 
-  <div id="area" class="card" aria-live="polite">
-    <div class="muted">Başlamak için “Hemen Oyna”.</div>
+  <!-- LİDERLİK TABLOSU -->
+  <div id="leaderboard" class="card">
+    <h2>Liderlik Tablosu</h2>
+    <p class="muted">En yüksek 10 skor cihazında saklanır.</p>
+    <ol id="boardList"></ol>
+  </div>
+
+  <!-- ROZETLER -->
+  <div id="badgesCard" class="card">
+    <h2>Rozetler</h2>
+    <ul id="badgeList"></ul>
+    <p class="muted">
+      Örnek rozetler: <b>İlk Adım</b> (ilk doğru), <b>Seri Ustası</b> (3 doğru arka arkaya),
+      <b>Zihin Ustası</b> (100+ puan), <b>Çoklu Zeka</b> (en az 3 farklı görev türü).
+    </p>
   </div>
 </div>
 
 <script>
-const $=s=>document.querySelector(s);
-const on=(el,ev,fn)=>{el.addEventListener(ev,fn,{passive:true})};
-const state={level:1,xp:0,score:0,timer:null,tLeft:0,round:false};
+  const $ = s => document.querySelector(s);
 
-document.body.style.touchAction='manipulation';
+  const state = {
+    name:"",
+    score:0,
+    level:1,
+    streak:0,
+    correctCount:0,
+    totalCount:0,
+    typesUsed:{},
+    badges:[],
+    leaderboard:[]
+  };
 
-function xpNeed(l){return 80+(l-1)*20;}
-function addXP(v){state.xp+=v;const need=xpNeed(state.level);if(state.xp>=need){state.xp-=need;state.level++;$('#level').textContent=state.level;}}
+  // LocalStorage'dan yükle
+  (function loadStored(){
+    try{
+      const lb = localStorage.getItem("mindga_leaderboard");
+      const bd = localStorage.getItem("mindga_badges");
+      if(lb) state.leaderboard = JSON.parse(lb);
+      if(bd) state.badges      = JSON.parse(bd);
+    }catch(e){}
+  })();
 
-function startTimer(s,onEnd){
-  state.tLeft=s;$('#time').textContent=state.tLeft+'s';
-  clearInterval(state.timer);
-  state.timer=setInterval(()=>{
-    state.tLeft--;
-    $('#time').textContent=state.tLeft+'s';
-    if(state.tLeft<=0){
-      clearInterval(state.timer);state.timer=null;state.round=false;
-      onEnd&&onEnd();
-    }
-  },1000)
-}
-
-function task_logic(){
-  const a=rand(5,20), b=rand(2,12);
-  const ops=['+','-','×']; const op=ops[rand(0,2)];
-  const ans=op==='+'?a+b:op==='-'?a-b:a*b;
-  const choices=shuffle([ans,ans+rand(1,3),ans-rand(1,3)]);
-
-  $('#area').innerHTML=
-  `<div class="big">Mantık-Matematik</div>
-   <div style="font-size:26px;margin:8px 0">${a} ${op} ${b} = ?</div>
-   <div class="grid">${choices.map(c=>`<button class="kbd opt" data-v="${c}">${c}</button>`).join('')}</div>`;
-
-  bindOptions(v=>+v===ans);
-  state.round=true;
-  startTimer(15,()=>{message("Süre doldu.");setTimeout(next,600);});
-}
-
-function task_verbal(){
-  const bank=[
-    {d:'Kısa ve öz anlatım',w:'veciz'},
-    {d:'Bir sorunu çözmek için izlenen yöntem',w:'strateji'},
-    {d:'Derin düşünme',w:'tefekkür'},
-    {d:'Bir işi yapma gücü',w:'kabiliyet'}
-  ];
-  const pick=bank[rand(0,bank.length-1)];
-  const wrongs=shuffle(bank.filter(x=>x.w!==pick.w)).slice(0,2).map(x=>x.w);
-  const choices=shuffle([pick.w,...wrongs]);
-
-  $('#area').innerHTML=
-  `<div class="big">Sözel-Dil</div>
-   <div style="margin:8px 0">${pick.d}</div>
-   <div class="grid">${choices.map(c=>`<button class="kbd opt" data-v="${c}">${c}</button>`).join('')}</div>`;
-
-  bindOptions(v=>v===pick.w);
-  state.round=true;
-  startTimer(18,()=>{message("Süre doldu.");setTimeout(next,600);});
-}
-
-function task_spatial(){
-  const size=3,len=Math.min(2+Math.floor(state.level/2),6);
-  const cells=[...Array(size*size)].map((_,i)=>i);
-  const seq=[];for(let i=0;i<len;i++)seq.push(cells[rand(0,cells.length-1)]);
-
-  $('#area').innerHTML=
-  `<div class="big">Görsel-Uzamsal (Hafıza)</div>
-   <div id="grid" style="display:grid;grid-template-columns:repeat(3,90px);gap:8px;margin-top:8px"></div>
-   <div class="muted">Sıralamayı tekrarla.</div>`;
-
-  const grid=$('#grid');
-  cells.forEach(i=>{
-    const b=document.createElement('button');
-    b.className='kbd opt'; b.style.width='90px'; b.style.height='90px'; b.dataset.i=i;
-    const h=()=>pick(i);
-    on(b,'click',h);on(b,'touchstart',h);
-    grid.appendChild(b);
-  });
-
-  let viewIdx=0,input=[];
-  function show(){
-    const i=seq[viewIdx];
-    const b=grid.children[i];
-    b.style.background='#7c9cff';
-    setTimeout(()=>{
-      b.style.background='';
-      viewIdx++;
-      if(viewIdx<seq.length) setTimeout(show,300); else state.round=true;
-    },300)
+  function saveStored(){
+    try{
+      localStorage.setItem("mindga_leaderboard", JSON.stringify(state.leaderboard));
+      localStorage.setItem("mindga_badges", JSON.stringify(state.badges));
+    }catch(e){}
   }
-  setTimeout(show,300);
 
-  function pick(i){
-    if(!state.round)return;
-    input.push(i);
-    if(input.length===seq.length){
-      if(input.every((v,k)=>v===seq[k]))win();
-      else lose("Sıra yanlış.");
-    }
+  function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+  function shuffle(arr){return arr.sort(()=>Math.random()-.5);}
+  function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+  function updateHud(){
+    $("#playerLabel").textContent = state.name;
+    $("#scoreLabel").textContent  = state.score;
+    $("#levelLabel").textContent  = state.level;
+    $("#streakLabel").textContent = state.streak;
+    $("#correctLabel").textContent= state.correctCount;
+    $("#totalLabel").textContent  = state.totalCount;
   }
-  startTimer(25,()=>{lose("Süre doldu.");});
-}
 
-function bindOptions(check){
-  document.querySelectorAll('.opt').forEach(btn=>{
-    const act=()=>{
-      if(!state.round)return;
-      check(btn.dataset.v)?win():lose("Yanlış.");
+  // Görevler
+  function makeLogicTask(){
+    const a=rand(2,15), b=rand(2,10);
+    const ops=["+","-","×"];
+    const op = pick(ops);
+    let ans;
+    if(op==="+") ans=a+b;
+    else if(op==="-") ans=a-b;
+    else ans=a*b;
+    const w1 = ans+rand(1,3);
+    const w2 = ans-rand(1,3);
+    const opts = shuffle([ans,w1,w2]);
+    return {
+      typeLabel:"Mantık-Matematik Zekâsı",
+      question:`${a} ${op} ${b} = ?`,
+      options:opts,
+      correct:ans
     };
-    on(btn,'click',act);on(btn,'touchstart',act);
-  })
-}
+  }
 
-function message(t){
-  const p=document.createElement('div');
-  p.className='muted'; p.textContent=t;
-  $('#area').appendChild(p);
-}
+  function makeVerbalTask(){
+    const bank=[
+      {def:"Kısa ve öz anlatım",word:"veciz"},
+      {def:"Bir sorunu çözmek için izlenen yöntem",word:"strateji"},
+      {def:"Derin düşünme",word:"tefekkür"},
+      {def:"Bir işi yapma gücü / yetenek",word:"kabiliyet"}
+    ];
+    const pickW = pick(bank);
+    const wrongs = shuffle(bank.filter(x=>x.word!==pickW.word)).slice(0,2).map(x=>x.word);
+    const opts = shuffle([pickW.word, ...wrongs]);
+    return {
+      typeLabel:"Sözel-Dil Zekâsı",
+      question:pickW.def,
+      options:opts,
+      correct:pickW.word
+    };
+  }
 
-function win(){
-  state.score+=30+10*state.level;
-  addXP(20+5*state.level);
-  $('#score').textContent=state.score;
-  next();
-}
+  function makeMemoryTask(){
+    const emoji = pick(["⭐","🔺","🔵","🟢"]);
+    const count = rand(2,5);
+    const seq = emoji.repeat(count);
+    const opts = shuffle([count, count+1, Math.max(1,count-1)]);
+    return {
+      typeLabel:"Görsel-Hafıza Zekâsı",
+      question:`Dizide (${seq}) kaç adet ${emoji} vardı?`,
+      options:opts,
+      correct:count
+    };
+  }
 
-function lose(t){
-  state.round=false;message(t);
-  setTimeout(next,600);
-}
+  function makeAttentionTask(){
+    const base = pick(["A","B","C","D"]);
+    const odd  = pick(["X","Y","Z"]);
+    const arr  = shuffle([base,base,base,odd]);
+    return {
+      typeLabel:"Dikkat-Hız Zekâsı",
+      question:"Aşağıdakilerden hangisi diğerlerinden farklı?",
+      options:arr,
+      correct:odd
+    };
+  }
 
-const tasks=[task_logic,task_verbal,task_spatial];
-function next(){ $('#level').textContent=state.level; tasks[rand(0,tasks.length-1)](); }
+  function createTask(){
+    const makers=[makeLogicTask,makeVerbalTask,makeMemoryTask,makeAttentionTask];
+    const maker = pick(makers);
+    const task  = maker();
 
-function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function shuffle(a){return a.sort(()=>Math.random()-.5);}
+    state.typesUsed[task.typeLabel] = true;
+    state.totalCount++;
 
-function start(){
-  state.level=1;state.xp=0;state.score=0;
-  $('#score').textContent='0';$('#level').textContent='1';
-  next();
-}
+    $("#taskType").textContent = task.typeLabel;
+    $("#question").textContent = task.question;
+    $("#feedback").textContent = "";
+    const box = $("#options");
+    box.innerHTML = "";
+    box.dataset.active = "1";
 
-on($('#quick'),'click',start);
-on($('#quick'),'touchstart',start);
-on($('#restart'),'click',start);
-on($('#restart'),'touchstart',start);
+    task.options.forEach(val=>{
+      const btn=document.createElement("button");
+      btn.textContent = val;
+      btn.className   = "optBtn";
+      btn.onclick = ()=>handleAnswer(val, task.correct, btn);
+      box.appendChild(btn);
+    });
+
+    updateHud();
+  }
+
+  function handleAnswer(given, correct, btn){
+    if($("#options").dataset.active !== "1") return;
+    $("#options").dataset.active = "0";
+
+    const buttons = document.querySelectorAll(".optBtn");
+    buttons.forEach(b=>{
+      if(String(b.textContent)===String(correct)) b.classList.add("correct");
+    });
+
+    if(String(given)===String(correct)){
+      state.score += 10;
+      state.correctCount++;
+      state.streak++;
+      $("#feedback").textContent = pick([
+        "Doğru cevap! 🎉",
+        "Harika gidiyorsun! 😎",
+        "Zekân parlıyor! 💡"
+      ]);
+      if(state.streak>=3){
+        $("#feedback").textContent += " • Seri yakaladın! 🔥";
+      }
+      const newLevel = 1 + Math.floor(state.score/40);
+      if(newLevel>state.level){
+        state.level=newLevel;
+        $("#feedback").textContent += ` • Seviye ${state.level} oldun! ⬆️`;
+      }
+      checkBadges();
+    }else{
+      state.streak=0;
+      btn.classList.add("wrong");
+      $("#feedback").textContent = pick([
+        "Bu kez olmadı, tekrar dene! 🙂",
+        "Hata normal, pes etme! 💪"
+      ]);
+    }
+    updateHud();
+  }
+
+  // Rozet kontrol
+  function addBadge(id){
+    if(!state.badges.includes(id)){
+      state.badges.push(id);
+      renderBadges();
+      saveStored();
+    }
+  }
+
+  function checkBadges(){
+    if(state.correctCount>=1)  addBadge("ilk");
+    if(state.streak>=3)       addBadge("seri");
+    if(state.score>=100)      addBadge("zihin");
+    if(Object.keys(state.typesUsed).length>=3) addBadge("coklu");
+  }
+
+  function renderBadges(){
+    const ul=$("#badgeList");
+    ul.innerHTML="";
+    if(!state.badges.length){
+      ul.innerHTML="<li>Henüz rozet yok. Oynadıkça açılacak. 🏅</li>";
+      return;
+    }
+    state.badges.forEach(id=>{
+      let text="";
+      if(id==="ilk")   text="İlk Adım – İlk doğru cevabını verdin.";
+      if(id==="seri")  text="Seri Ustası – Art arda 3 doğru.";
+      if(id==="zihin") text="Zihin Ustası – 100+ puan.";
+      if(id==="coklu") text="Çoklu Zeka – En az 3 farklı görev türü çözdün.";
+      const li=document.createElement("li");
+      li.textContent=text;
+      ul.appendChild(li);
+    });
+  }
+
+  // Liderlik
+  function renderBoard(){
+    const ol=$("#boardList");
+    ol.innerHTML="";
+    if(!state.leaderboard.length){
+      const li=document.createElement("li");
+      li.className="muted";
+      li.textContent="Henüz kayıtlı skor yok.";
+      ol.appendChild(li);
+      return;
+    }
+    const copy = state.leaderboard.slice().sort((a,b)=>b.score-a.score).slice(0,10);
+    copy.forEach((r,i)=>{
+      const li=document.createElement("li");
+      li.textContent=`${i+1}. ${r.name} – ${r.score} puan`;
+      ol.appendChild(li);
+    });
+  }
+
+  function saveScore(){
+    if(!state.name){
+      alert("Önce kullanıcı adıyla oyuna başla.");
+      return;
+    }
+    state.leaderboard.push({name:state.name, score:state.score});
+    saveStored();
+    renderBoard();
+    alert("Skorun liderlik tablosuna kaydedildi. 🏆");
+  }
+
+  // Olaylar
+  $("#startBtn").onclick = ()=>{
+    const name=$("#userName").value.trim();
+    if(!name){
+      alert("Lütfen bir kullanıcı adı yaz.");
+      return;
+    }
+    state.name=name;
+    state.score=0;
+    state.level=1;
+    state.streak=0;
+    state.correctCount=0;
+    state.totalCount=0;
+    state.typesUsed={};
+    $("#currentPlayer").style.display="block";
+    $("#game").style.display="block";
+    createTask();
+  };
+
+  $("#nextBtn").onclick = ()=>createTask();
+  $("#saveBtn").onclick = ()=>saveScore();
+
+  // İlk ekran: liderlik & rozetleri çiz
+  renderBoard();
+  renderBadges();
+  updateHud();
 </script>
 </body>
 </html>
