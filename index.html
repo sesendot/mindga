@@ -2,26 +2,27 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8">
-  <title>MindGA – Zeka Oyunu (Açık Tema)</title>
+  <title>MindGA – Çoklu Zekâ Oyunu</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root{
-      --bg:#f3f5fb;
-      --card:#ffffff;
-      --border:#d0d4e6;
-      --text:#111827;
-      --muted:#6b7280;
-      --primary:#2563eb;
+      --bg:#050816;
+      --card:#0b1024;
+      --card2:#111632;
+      --border:#252b5a;
+      --text:#f9fafb;
+      --muted:#a3a7d4;
+      --primary:#60a5fa;
       --primary-dark:#1d4ed8;
-      --accent:#f97316;
-      --correct:#16a34a;
-      --wrong:#dc2626;
+      --accent:#facc15;
+      --correct:#22c55e;
+      --wrong:#f97373;
     }
-    *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
     body{
       margin:0;
       font-family:system-ui,Segoe UI,Roboto,Arial;
-      background:var(--bg);
+      background:radial-gradient(circle at top,#1d254b 0,var(--bg) 55%);
       color:var(--text);
     }
     .wrap{
@@ -30,84 +31,91 @@
       padding:16px;
     }
     h1{margin:0 0 6px;font-size:24px}
-    h2{margin:0 0 4px;font-size:18px}
+    h2{margin:0 0 6px;font-size:18px}
     .card{
       background:var(--card);
       border:1px solid var(--border);
-      border-radius:16px;
+      border-radius:18px;
       padding:14px;
       margin-top:14px;
-      box-shadow:0 4px 10px rgba(15,23,42,.06);
+      box-shadow:0 14px 30px rgba(0,0,0,.4);
     }
+    .card.alt{background:var(--card2);}
     .row{
       display:flex;
       gap:8px;
       flex-wrap:wrap;
       align-items:center;
     }
-    input,button{
-      font:inherit;
-    }
+    input,button{font:inherit;}
     input{
       padding:8px 10px;
-      border-radius:10px;
+      border-radius:999px;
       border:1px solid var(--border);
-      background:#f9fafb;
+      background:#06091a;
       color:var(--text);
       min-width:160px;
     }
+    input::placeholder{color:#6b7280;}
     button{
-      padding:8px 14px;
+      padding:8px 16px;
       border-radius:999px;
       border:none;
       cursor:pointer;
-      background:var(--primary);
-      color:white;
-      font-weight:600;
+      background:linear-gradient(135deg,var(--primary),#93c5fd);
+      color:#020617;
+      font-weight:700;
       touch-action:manipulation;
+    }
+    button.secondary{
+      background:#020617;
+      border:1px solid var(--border);
+      color:var(--muted);
+      font-weight:500;
     }
     button:active{transform:scale(.97);}
     .muted{color:var(--muted);font-size:13px}
     #currentPlayer{margin-top:6px}
-    #game{margin-top:8px}
+    #game{margin-top:10px}
     #taskType{
       font-size:13px;
       color:var(--accent);
       font-weight:600;
       text-transform:uppercase;
-      letter-spacing:.03em;
+      letter-spacing:.06em;
     }
     #question{
       margin:8px 0 10px;
-      font-size:18px;
+      font-size:20px;
     }
     #options{
       display:flex;
       flex-wrap:wrap;
-      gap:8px;
+      gap:10px;
       margin-bottom:8px;
     }
     .optBtn{
-      background:#eef2ff;
-      border:1px solid #c7d2fe;
-      color:var(--text);
+      background:#111832;
+      border:2px solid #2f3b80;
+      color:#ffffff;          /* ÖNEMLİ: YAZI BEYAZ */
       border-radius:12px;
-      padding:8px 14px;
-      min-width:80px;
+      padding:10px 16px;
+      min-width:90px;
       text-align:center;
       cursor:pointer;
       touch-action:manipulation;
+      font-size:16px;
     }
     .optBtn.correct{
-      background:#dcfce7;
-      border-color:#86efac;
-      color:#065f46;
+      background:rgba(34,197,94,.16);
+      border-color:var(--correct);
+      color:#bbf7d0;
       font-weight:700;
     }
     .optBtn.wrong{
-      background:#fee2e2;
-      border-color:#fecaca;
-      color:#991b1b;
+      background:rgba(248,113,113,.18);
+      border-color:var(--wrong);
+      color:#fecaca;
     }
     #feedback{
       min-height:22px;
@@ -115,10 +123,11 @@
       margin-top:4px;
     }
     #hudSmall{
-      font-size:14px;
+      font-size:13px;
       margin-top:4px;
+      color:var(--muted);
     }
-    #hudSmall span{font-weight:600}
+    #hudSmall span{font-weight:600;color:#e5e7eb;}
     #leaderboard ol{
       padding-left:20px;
       margin:4px 0 0;
@@ -140,31 +149,33 @@
 <div class="wrap">
   <!-- ÜST: Kullanıcı adı ve durum -->
   <div class="card">
-    <h1>MindGA – Zeka Oyunu</h1>
+    <h1>Mind Game – <span style="color:#4ade80">Touch Fix</span></h1>
     <p class="muted">
-      Kullanıcı adını yaz, soruları çöz, puan ve seviye kazan. Skorunu liderlik tablosuna kaydedebilirsin. 🎮🧠
+      Kullanıcı adını yaz, soruları çöz, seviye atla. Puanını kaydedip liderlik tablosunda yerini al. 🎮🧠
     </p>
     <div id="login" class="row">
       <input id="userName" placeholder="Kullanıcı adın" />
       <button id="startBtn">Oyuna Başla</button>
     </div>
     <div id="currentPlayer" class="muted" style="display:none">
-      Oyuncu: <b id="playerLabel"></b> • Seviye: <b id="levelLabel">1</b> • Puan: <b id="scoreLabel">0</b> • Seri: <b id="streakLabel">0</b>
+      Oyuncu: <b id="playerLabel"></b> • Seviye: <b id="levelLabel">1</b> •
+      Puan: <b id="scoreLabel">0</b> • Seri: <b id="streakLabel">0</b>
     </div>
   </div>
 
   <!-- OYUN ALANI -->
-  <div id="game" class="card" style="display:none">
+  <div id="game" class="card alt" style="display:none">
     <div id="taskType"></div>
     <div id="question"></div>
     <div id="options"></div>
     <div id="feedback" class="muted"></div>
-    <div id="hudSmall" class="muted">
-      Doğru: <span id="correctLabel">0</span> • Çözülmüş soru: <span id="totalLabel">0</span>
+    <div id="hudSmall">
+      Doğru: <span id="correctLabel">0</span> • Çözülmüş soru:
+      <span id="totalLabel">0</span>
     </div>
     <div class="row" style="margin-top:10px">
       <button id="nextBtn">Sonraki Soru</button>
-      <button id="saveBtn" style="background:var(--accent);color:white">Skoru Liderliğe Kaydet</button>
+      <button id="saveBtn" class="secondary">Skoru Liderliğe Kaydet 🏆</button>
     </div>
   </div>
 
@@ -181,7 +192,7 @@
     <ul id="badgeList"></ul>
     <p class="muted">
       Örnek rozetler: <b>İlk Adım</b> (ilk doğru), <b>Seri Ustası</b> (3 doğru arka arkaya),
-      <b>Zihin Ustası</b> (100+ puan), <b>Çoklu Zeka</b> (en az 3 farklı görev türü).
+      <b>Zihin Ustası</b> (100+ puan), <b>Çoklu Zekâ</b> (en az 3 farklı görev türü).
     </p>
   </div>
 </div>
@@ -223,7 +234,7 @@
   function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 
   function updateHud(){
-    $("#playerLabel").textContent = state.name;
+    $("#playerLabel").textContent = state.name || "-";
     $("#scoreLabel").textContent  = state.score;
     $("#levelLabel").textContent  = state.level;
     $("#streakLabel").textContent = state.streak;
@@ -231,7 +242,7 @@
     $("#totalLabel").textContent  = state.totalCount;
   }
 
-  // Görevler
+  // Görevler (mantık, sözel, hafıza, dikkat)
   function makeLogicTask(){
     const a=rand(2,15), b=rand(2,10);
     const ops=["+","-","×"];
@@ -244,7 +255,7 @@
     const w2 = ans-rand(1,3);
     const opts = shuffle([ans,w1,w2]);
     return {
-      typeLabel:"Mantık-Matematik Zekâsı",
+      typeLabel:"Mantık-Matematik",
       question:`${a} ${op} ${b} = ?`,
       options:opts,
       correct:ans
@@ -258,24 +269,24 @@
       {def:"Derin düşünme",word:"tefekkür"},
       {def:"Bir işi yapma gücü / yetenek",word:"kabiliyet"}
     ];
-    const pickW = pick(bank);
-    const wrongs = shuffle(bank.filter(x=>x.word!==pickW.word)).slice(0,2).map(x=>x.word);
-    const opts = shuffle([pickW.word, ...wrongs]);
+    const p = pick(bank);
+    const wrongs = shuffle(bank.filter(x=>x.word!==p.word)).slice(0,2).map(x=>x.word);
+    const opts = shuffle([p.word,...wrongs]);
     return {
-      typeLabel:"Sözel-Dil Zekâsı",
-      question:pickW.def,
+      typeLabel:"Sözel-Dil",
+      question:p.def,
       options:opts,
-      correct:pickW.word
+      correct:p.word
     };
   }
 
   function makeMemoryTask(){
     const emoji = pick(["⭐","🔺","🔵","🟢"]);
     const count = rand(2,5);
-    const seq = emoji.repeat(count);
-    const opts = shuffle([count, count+1, Math.max(1,count-1)]);
+    const seq   = emoji.repeat(count);
+    const opts  = shuffle([count, count+1, Math.max(1,count-1)]);
     return {
-      typeLabel:"Görsel-Hafıza Zekâsı",
+      typeLabel:"Görsel-Hafıza",
       question:`Dizide (${seq}) kaç adet ${emoji} vardı?`,
       options:opts,
       correct:count
@@ -287,7 +298,7 @@
     const odd  = pick(["X","Y","Z"]);
     const arr  = shuffle([base,base,base,odd]);
     return {
-      typeLabel:"Dikkat-Hız Zekâsı",
+      typeLabel:"Dikkat-Hız",
       question:"Aşağıdakilerden hangisi diğerlerinden farklı?",
       options:arr,
       correct:odd
@@ -366,7 +377,6 @@
       saveStored();
     }
   }
-
   function checkBadges(){
     if(state.correctCount>=1)  addBadge("ilk");
     if(state.streak>=3)       addBadge("seri");
@@ -386,7 +396,7 @@
       if(id==="ilk")   text="İlk Adım – İlk doğru cevabını verdin.";
       if(id==="seri")  text="Seri Ustası – Art arda 3 doğru.";
       if(id==="zihin") text="Zihin Ustası – 100+ puan.";
-      if(id==="coklu") text="Çoklu Zeka – En az 3 farklı görev türü çözdün.";
+      if(id==="coklu") text="Çoklu Zekâ – En az 3 farklı görev türü çözdün.";
       const li=document.createElement("li");
       li.textContent=text;
       ul.appendChild(li);
@@ -420,7 +430,7 @@
     state.leaderboard.push({name:state.name, score:state.score});
     saveStored();
     renderBoard();
-    alert("Skorun liderlik tablosuna kaydedildi. 🏆");
+    alert("Skorun kaydedildi. 🏆");
   }
 
   // Olaylar
@@ -445,7 +455,7 @@
   $("#nextBtn").onclick = ()=>createTask();
   $("#saveBtn").onclick = ()=>saveScore();
 
-  // İlk ekran: liderlik & rozetleri çiz
+  // İlk yükleme: liderlik + rozet
   renderBoard();
   renderBadges();
   updateHud();
